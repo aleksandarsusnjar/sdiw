@@ -4,10 +4,12 @@ const sdiwIntroSample = `
 ;; This is a UoW MIPS CS 230 assembly course(s) learning tool,
 ;; a single-step, visual live/interactive interpreter and debugger.
 ;;
-;; For the supported instruction set see:
-;; https://web.archive.org/web/20250421175919/https://cs.uwaterloo.ca/~b246chen/Notes/CS_230/mipsref.pdf
+;; Supported instructions: .word, add, sub, mult, multu, div, divu,
+;; mfhi, mflo, lis, lw, sw, slt, sltu, beq, bne, jr, jalr, addi, j
+;; and jal.
+
 ;;
-;; It is a work in progress, so expect bugs and missing features.
+;; This is a work in progress, so expect bugs and missing features.
 ;;
 ;; MIT Licensed. Enjoy responsibly, don't expect anything.
 
