@@ -1,0 +1,173 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+#banner {
+  font-family: sans-serif;
+  font-size: larger;
+  vertical-align: middle;
+  padding-left: 0.5em;
+  padding-top: 0.5ex;
+  height: 3ex;
+  background-color: #ffffff;
+}
+
+#banner button {
+  float: right;
+  margin-left: 3em
+}
+
+#header {
+  padding: 10px;
+  background-color: #f0f0f0;
+}
+
+#container {
+  flex: 1;
+  min-height: 0;
+  /* critical for Chrome */
+}
+
+#wrapper {
+  width: 100%;
+  height: calc(100vh - 24pt);
+  border: 1px solid gray;
+  table-layout: fixed;
+}
+
+table#wrapper thead tr th {
+  background-color: #f0f0f0;
+  font-family: sans-serif;
+  resize: horizontal;
+  overflow-x: scroll;
+}
+
+table#wrapper tbody tr {
+  vertical-align: top;
+}
+
+.editor-pane {
+  width: 40%;
+  height: 100%;
+}
+
+.status-pane {
+  width: 20%;
+  height: 100%;
+  background-color: #f0f0f0;
+  padding: 10px;
+  border-left: 1px solid gray;
+}
+
+.status-pane h2 {
+  font-family: sans-serif;
+  font-size: medium;
+}
+
+table#registers {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: monospace;
+  text-align: left;
+  white-space: pre;
+  background-color: #ffffff;
+  resize: none;
+  table-layout: fixed;
+}
+
+table#registers tr,
+table#registers th,
+table#registers td,
+table#registers td div {
+  vertical-align: middle;
+  overflow: hidden;
+  width: 100%;
+  line-height: 2ex;
+  height: 2.5ex;
+}
+
+
+table#registers td.registerAccess,
+table#registers td.registerAccess div {
+  background-color: blue;
+  color: white;
+}
+
+
+
+table#registers tr.reg-special {
+  background-color: rgba(255, 192, 0, 0.25);
+}
+
+table#registers tr.reg-special-uow {
+  background-color: rgba(192, 255, 255, 0.5);
+}
+
+table#registers tr.reg-kernel {
+  background-color: rgba(255, 0, 0, 0.25);
+}
+
+table#registers tr.reg-at {
+  background-color: rgba(0, 255, 0, 0.1);
+}
+
+table#registers tr.reg-result {
+  background-color: rgba(255, 128, 0, 0.1);
+}
+
+table#registers tr.reg-arg {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+table#registers tr.reg-temp {
+  background-color: rgba(255, 255, 0, 0.5);
+}
+
+table#registers tr.reg-saved {
+  background-color: rgba(0, 255, 0, 0.25);
+}
+
+table#registers tr.reg-hilo {
+  background-color: rgba(0, 0, 255, 0.25);
+}
+
+table#registers tr.reg-pc {
+  background-color: rgba(0, 0, 0, 1);
+  color: white;
+}
+
+
+table#registers tr:nth-child(even) th,
+table#registers tr:nth-child(even) td {
+  background-color: rgba(0, 0, 0, 0.1);
+  whitespace: pre;
+}
+
+textarea {
+  width: 100%;
+  resize: none;
+  font-family: monospace;
+}
+
+
+.nextToExecuteHighlight {
+  background-color:rgba(0, 0, 255, 12%);
+}
+
+.breakpointHighlight {
+  background-color:rgba(255, 0, 0, 12%);
+}
+
+.breakpointGlyph {
+  width: 40px;
+  background-color: red;
+  background: url('data:image/svg+xml;utf8,<svg fill="red" viewBox="0 0 24 24" height="14" width="14" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="6"/></svg>') no-repeat center center;
+}
+
+.memoryAccess {
+  background-color:rgba(0, 255, 0, 12%);
+}

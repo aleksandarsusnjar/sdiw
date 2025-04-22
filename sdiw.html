@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>SdIW * C&mu;/Later</title>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <link rel="stylesheet" href="sdiw.css"/>
+</head>
+<body>
+  <div id="banner">
+	<span id="title">SdIW * C&mu;/Later</span>
+    <button id="run-end-button" onclick="runToEnd();">Start/Continue (F5)</button>
+	<button id="run-ret-button" onclick="runToReturn();">Run up to jr $31 (Shift+F11)</button>
+    <button id="run-pause-button" onclick="pauseRunning();">Pause (Shift+F5)</button>
+    <button id="run-button" onclick="runStep();">Run a single step (F11)</button>
+	<button id="stop-button" onclick="stopReset();">Stop</button>
+  </div>
+  <table id="wrapper">
+    <thead>
+        <tr>
+            <th>What's in memory</th>
+            <th>Your source code</th>
+            <th>CPU registers &amp; standard I/O</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td id="editor-left" class="editor-pane"></td>
+            <td id="editor-right" class="editor-pane"></td>
+            <td id="status" class="status-pane">
+                <table id="registers">
+                    <colgroup>
+                        <col style="width: 8ch;">
+                        <col style="width: calc(100% - 8ch);">
+                    </colgroup>
+                    <tbody>
+                        <tr class="reg-special" title=" $0/z - Always zero">
+                            <th id="reg-0"> $0/z</th>
+                            <td><div id="val-0">--</div></td>
+                        </tr>
+                        <tr class="reg-at" title=" $1/at - Assembler Temporary">
+                            <th id="reg-1"> $1/at</th>
+                            <td><div id="val-1">--</div></td>
+                        </tr>
+                        <tr class="reg-result" title=" $2/v0 - Function result 0 / expression">
+                            <th id="reg-2"> $2/v0</th>
+                            <td><div id="val-2">--</div></td>
+                        </tr>
+                        <tr class="reg-result" title=" $3/v1 - Function result 1 / expression">
+                            <th id="reg-3"> $3/v1</th>
+                            <td><div id="val-3">--</div></td>
+                        </tr>
+                        <tr class="reg-arg" title=" $4/a0 - Argument 0">
+                            <th id="reg-4"> $4/a0</th>
+                            <td><div id="val-4">--</div></td>
+                        </tr>
+                        <tr class="reg-arg" title=" $5/a1 - Argument 1">
+                            <th id="reg-5"> $5/a1</th>
+                            <td><div id="val-5">--</div></td>
+                        </tr>
+                        <tr class="reg-arg" title=" $6/a2 - Argument 2">
+                            <th id="reg-6"> $6/a2</th>
+                            <td><div id="val-6">--</div></td>
+                        </tr>
+                        <tr class="reg-arg" title=" $7/a3 - Argument 3">
+                            <th id="reg-7"> $7/a3</th>
+                            <td><div id="val-7">--</div></td>
+                        </tr>
+                        <tr class="reg-temp" title=" $8/t0 - Temporary 0,  caller must save:&#10;&#10;- If I call a function I can assume it will not modify these registers.&#10;&#10;- If I want to modify one of these registers, I must save the original value on the stack first and then restore that value after I am done using the register.">
+                            <th id="reg-8"> $8/t0</th>
+                            <td><div id="val-8">--</div></td>
+                        </tr>
+                        <tr class="reg-temp" title=" $9/t1 - Temporary 1,  caller must save:&#10;&#10;- If I call a function I can assume it will not modify these registers.&#10;&#10;- If I want to modify one of these registers, I must save the original value on the stack first and then restore that value after I am done using the register.">
+                            <th id="reg-9"> $9/t1</th>
+                            <td><div id="val-9">--</div></td>
+                        </tr>
+                        <tr class="reg-temp" title="$10/t2 - Temporary 2,  caller must save:&#10;&#10;- If I call a function I can assume it will not modify these registers.&#10;&#10;- If I want to modify one of these registers, I must save the original value on the stack first and then restore that value after I am done using the register.">
+                            <th id="reg-10">$10/t2</th>
+                            <td><div id="val-10">--</div></td>
+                        </tr>
+                        <tr class="reg-temp" title="$11/t3 - Temporary 3,  caller must save:&#10;&#10;- If I call a function I can assume it will not modify these registers.&#10;&#10;- If I want to modify one of these registers, I must save the original value on the stack first and then restore that value after I am done using the register.">
+                            <th id="reg-11">$11/t3</th>
+                            <td><div id="val-11">--</div></td>
+                        </tr>
+                        <tr class="reg-temp" title="$12/t4 - Temporary 4,  caller must save:&#10;&#10;- If I call a function I can assume it will not modify these registers.&#10;&#10;- If I want to modify one of these registers, I must save the original value on the stack first and then restore that value after I am done using the register.">
+                            <th id="reg-12">$12/t4</th>
+                            <td><div id="val-12">--</div></td>
+                        </tr>
+                        <tr class="reg-temp" title="$13/t5 - Temporary 5,  caller must save:&#10;&#10;- If I call a function I can assume it will not modify these registers.&#10;&#10;- If I want to modify one of these registers, I must save the original value on the stack first and then restore that value after I am done using the register.">
+                            <th id="reg-13">$13/t5</th>
+                            <td><div id="val-13">--</div></td>
+                        </tr>
+                        <tr class="reg-temp" title="$14/t6 - Temporary 6,  caller must save:&#10;&#10;- If I call a function I can assume it will not modify these registers.&#10;&#10;- If I want to modify one of these registers, I must save the original value on the stack first and then restore that value after I am done using the register.">
+                            <th id="reg-14">$14/t6</th>
+                            <td><div id="val-14">--</div></td>
+                        </tr>
+                        <tr class="reg-temp" title="$15/t7 - Temporary 7,  caller must save:&#10;&#10;- If I call a function I can assume it will not modify these registers.&#10;&#10;- If I want to modify one of these registers, I must save the original value on the stack first and then restore that value after I am done using the register.">
+                            <th id="reg-15">$15/t7</th>
+                            <td><div id="val-15">--</div></td>
+                        </tr>
+                        <tr class="reg-saved" title="$16/s0 - Saved temporary 0, callee must save:&#10;&#10;- If I call a function, I must assume it overwrites these registers.&#10;&#10;- I am free to modify these registers at any time.&#10;&#10;- If I call a function but I want to preserve a value from one of these registers, I must store that value on the stack.">
+                            <th id="reg-16">$16/s0</th>
+                            <td><div id="val-16">--</div></td>
+                        </tr>
+                        <tr class="reg-saved" title="$17/s1 - Saved temporary 1, callee must save:&#10;&#10;- If I call a function, I must assume it overwrites these registers.&#10;&#10;- I am free to modify these registers at any time.&#10;&#10;- If I call a function but I want to preserve a value from one of these registers, I must store that value on the stack.">
+                            <th id="reg-17">$17/s1</th>
+                            <td><div id="val-17">--</div></td>
+                        </tr>
+                        <tr class="reg-saved" title="$18/s2 - Saved temporary 2, callee must save:&#10;&#10;- If I call a function, I must assume it overwrites these registers.&#10;&#10;- I am free to modify these registers at any time.&#10;&#10;- If I call a function but I want to preserve a value from one of these registers, I must store that value on the stack.">
+                            <th id="reg-18">$18/s2</th>
+                            <td><div id="val-18">--</div></td>
+                        </tr>
+                        <tr class="reg-saved" title="$19/s3 - Saved temporary 3, callee must save:&#10;&#10;- If I call a function, I must assume it overwrites these registers.&#10;&#10;- I am free to modify these registers at any time.&#10;&#10;- If I call a function but I want to preserve a value from one of these registers, I must store that value on the stack.">
+                            <th id="reg-19">$19/s3</th>
+                            <td><div id="val-19">--</div></td>
+                        </tr>
+                        <tr class="reg-saved" title="$20/s4 - Saved temporary 4, callee must save:&#10;&#10;- If I call a function, I must assume it overwrites these registers.&#10;&#10;- I am free to modify these registers at any time.&#10;&#10;- If I call a function but I want to preserve a value from one of these registers, I must store that value on the stack.">
+                            <th id="reg-20">$20/s4</th>
+                            <td><div id="val-20">--</div></td>
+                        </tr>
+                        <tr class="reg-saved" title="$21/s5 - Saved temporary 5, callee must save:&#10;&#10;- If I call a function, I must assume it overwrites these registers.&#10;&#10;- I am free to modify these registers at any time.&#10;&#10;- If I call a function but I want to preserve a value from one of these registers, I must store that value on the stack.">
+                            <th id="reg-21">$21/s5</th>
+                            <td><div id="val-21">--</div></td>
+                        </tr>
+                        <tr class="reg-saved" title="$22/s6 - Saved temporary 6, callee must save:&#10;&#10;- If I call a function, I must assume it overwrites these registers.&#10;&#10;- I am free to modify these registers at any time.&#10;&#10;- If I call a function but I want to preserve a value from one of these registers, I must store that value on the stack.">
+                            <th id="reg-22">$22/s6</th>
+                            <td><div id="val-22">--</div></td>
+                        </tr>
+                        <tr class="reg-saved" title="$23/s7 - Saved temporary 7, callee must save:&#10;&#10;- If I call a function, I must assume it overwrites these registers.&#10;&#10;- I am free to modify these registers at any time.&#10;&#10;- If I call a function but I want to preserve a value from one of these registers, I must store that value on the stack.">
+                            <th id="reg-23">$23/s7</th>
+                            <td><div id="val-23">--</div></td>
+                        </tr>
+                        <tr class="reg-temp" title="$24/t8 - Temporary 8,  caller must save:&#10;&#10;- If I call a function I can assume it will not modify these registers.&#10;&#10;- If I want to modify one of these registers, I must save the original value on the stack first and then restore that value after I am done using the register.">
+                            <th id="reg-24">$24/t8</th>
+                            <td><div id="val-24">--</div></td>
+                        </tr>
+                        <tr class="reg-temp" title="$25/t9 - Temporary 9,  caller must save:&#10;&#10;- If I call a function I can assume it will not modify these registers.&#10;&#10;- If I want to modify one of these registers, I must save the original value on the stack first and then restore that value after I am done using the register.">
+                            <th id="reg-25">$25/t9</th>
+                            <td><div id="val-25">--</div></td>
+                        </tr>
+                        <tr class="reg-kernel" title="$26/k0 - OS kernel 0">
+                            <th id="reg-26">$26/k0</th>
+                            <td><div id="val-26">--</div></td>
+                        </tr>
+                        <tr class="reg-kernel" title="$27/k1 - OS kernel 1">
+                            <th id="reg-27">$27/k1</th>
+                            <td><div id="val-27">--</div></td>
+                        </tr>
+                        <tr class="reg-special" title="$28/gp - Global pointer">
+                            <th id="reg-28">$28/gp</th>
+                            <td><div id="val-28">--</div></td>
+                        </tr>
+                        <tr class="reg-special" title="$29/sp - Stack Pointer (but not at UoW)">
+                            <th id="reg-29">$29/sp</th>
+                            <td><div id="val-29">--</div></td>
+                        </tr>
+                        <tr class="reg-special-uow" title="$30/fp - Frame pointer (used as stack pointer in UoW)">
+                            <th id="reg-30">$30/fp</th>
+                            <td><div id="val-30">--</div></td>
+                        </tr>
+                        <tr class="reg-special-uow" title="$31/ra - Return address">
+                            <th id="reg-31">$31/ra</th>
+                            <td><div id="val-31">--</div></td>
+                        </tr>
+                        <tr class="reg-hilo" title="Hi/Rem - High 32 bits of 64-bit multiplication result or remainder of division.">
+                            <th id="reg-32">Hi/Rem</th>
+                            <td><div id="val-32">--</div></td>
+                        </tr>
+                        <tr class="reg-hilo" title="Lo/Quo - Low 32 bits of 64-bit multiplication result or the quotient of division.">
+                            <th id="reg-33">Lo/Quo</th>
+                            <td><div id="val-33">--</div></td>
+                        </tr>
+                        <tr class="reg-pc" title="PC - Program Counter, the location of the instruction to execute next.">
+                            <th id="reg-34">PC</th>
+                            <td><div id="val-34">--</div></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h2>STDIN (0xffff0004) remaining</h2>
+                <textarea id="stdin" rows="10" cols="30" readonly></textarea>
+                <h2>STDOUT (0xffff000c) so far</h2>
+                <textarea id="stdout" rows="10" cols="30" readonly></textarea>
+            </td>
+            </tr>
+    </tbody>
+  </table>
+  </div>
+  
+  <script src="sdiw-language.js"></script>
+  <script src="sdiw-gutter-language.js"></script>
+
+  <script>
+	const monacoVersion = '0.49.0';
+	const monacoBaseUrl = 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/' + monacoVersion + '/min/';
+  </script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.49.0/min/vs/loader.min.js"></script>
+  <script src="sdiw-intro-sample.js"></script>
+  <script src="sdiw-ui.js"></script>
+  <script src="sdiw-cmulater.js"></script>
+</body>
+</html>
