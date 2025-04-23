@@ -1,0 +1,40 @@
+;; INPUT
+;;
+;!! $1 <-- input_array ; address of array
+;!! $2 <-- 3           ; array length
+;;
+;; LOCALS
+;;
+;; $8 - current array element address, going backwards
+;; $9 - current array element value + absolute + doubled
+;; $10 - less than 0?
+
+    add $8, $2, $2 ; $8 <- 2 * $2
+    add $8, $8, $8 ; $8 <- 4 * $2
+    add $8, $1, $8 ; $8 <- $1 + $8
+
+    ; $8 - address of element AFTER the end of the array
+    
+loop:        
+    beq $8, $1, done
+
+    addi $8, $8, -4
+
+    lw $9, 0($8)    
+    slt $10, $9, $0
+    beq $10, $0, nonnegative
+
+    sub $9, $0, $9   ; negatte $9 to get positive value
+
+nonnegative:
+    add $9, $9, $9   ; double it
+    sw $9, 0($8)
+    beq $0, $0, loop
+
+done:
+    jr $31
+
+input_array: 
+    .word 123
+    .word 234
+    .word 345

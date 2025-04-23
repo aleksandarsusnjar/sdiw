@@ -1,0 +1,1152 @@
+
+<!DOCTYPE html><html><head>
+    <title>Sudokick</title>
+    <style>
+        body {
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+            user-select: none;
+        }
+        #board-div, #extras-div {
+            display: inline-block;
+            vertical-align: top;
+        }
+        #extras-div {
+            margin-left: 3.47vmin;
+        }
+        table {
+            border-collapse: collapse;
+            table-layout: fixed;
+            overflow: clip;
+        }
+        td {
+            border: solid 1px;
+            overflow: clip;
+            overflow: clip;
+        }
+        #board-corner, 
+        .column-hint, .column-padding,
+        .box-hint-left, .box-hint, .box-hint-padding,
+        .row-hint, .cell-padding-top, .cell-padding-middle, .cell-padding-bottom {
+            border: solid 0px;
+        }
+
+        .column-padding {
+            width: 3.47vmin;
+        }
+
+        .cell-hint {
+            width: 1.73vmin;
+            height: 8.69vmin;
+            text-align: center;
+            vertical-align: top;
+            font-weight: normal;
+            font-size: 1.44vmin;
+            line-height: 1.73vmin;
+         
+        }
+
+        .cell-value {
+            width: 5.21vmin;
+            height: 8.69vmin;
+            text-align: center;
+            vertical-align: middle;
+            font-weight: bold;
+            font-size: 5.79vmin;
+            border-left: 0px;
+            border-right: 0px;
+            overflow: clip;
+            white-space: nowrap;
+        }
+
+        .key {
+            width: 8.69vmin;
+            height: 8.69vmin;
+            text-align: center;
+            vertical-align: middle;
+            font-weight: bold;
+            font-size: 5.79vmin;
+            cursor: pointer;
+        }
+
+        .cell-top-left-left-hint, .cell-top-middle-left-hint, .cell-top-right-left-hint,
+        .cell-middle-left-left-hint, .cell-middle-middle-left-hint, .cell-middle-right-left-hint,
+        .cell-bottom-left-left-hint, .cell-bottom-middle-left-hint, .cell-bottom-right-left-hint {
+            width: 1.73vmin;
+            height: 8.69vmin;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 1.73vmin;
+            
+        }
+
+        .cell-top-left-right-hint, .cell-top-middle-right-hint, .cell-top-right-right-hint,
+        .cell-middle-left-right-hint, .cell-middle-middle-right-hint, .cell-middle-right-right-hint,
+        .cell-bottom-left-right-hint, .cell-bottom-middle-right-hint, .cell-bottom-right-right-hint {
+            width: 1.73vmin;
+            height: 8.69vmin;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 1.73vmin;
+        }
+
+        .cell-top-left-left-hint, .cell-top-middle-left-hint, .cell-top-right-left-hint,
+        .cell-top-left-right-hint, .cell-top-middle-right-hint, .cell-top-right-right-hint,
+        .cell-top-value {
+            border-top: solid 3px;
+        }
+
+        .cell-bottom-left-left-hint, .cell-bottom-middle-left-hint, .cell-bottom-right-left-hint,
+        .cell-bottom-left-right-hint, .cell-bottom-middle-right-hint, .cell-bottom-right-right-hint,
+        .cell-bottom-value {
+            border-bottom: solid 3px;
+        }
+
+        .cell-top-left-left-hint, .cell-middle-left-left-hint, .cell-bottom-left-left-hint {
+            border-left: solid 3px;
+        }
+
+        .cell-top-right-right-hint, .cell-middle-right-right-hint, .cell-bottom-right-right-hint {
+            border-right: solid 3px;
+        }
+
+        .cell-top-left-left-hint, .cell-top-middle-left-hint, .cell-top-right-left-hint,
+        .cell-middle-left-left-hint, .cell-middle-middle-left-hint, .cell-middle-right-left-hint,
+        .cell-bottom-left-left-hint, .cell-bottom-middle-left-hint, .cell-bottom-right-left-hint,
+        .cell-value {
+            border-right: 0px;
+        }
+
+        .cell-top-left-right-hint, .cell-top-middle-right-hint, .cell-top-right-right-hint,
+        .cell-middle-left-right-hint, .cell-middle-middle-right-hint, .cell-middle-right-right-hint,
+        .cell-bottom-left-right-hint, .cell-bottom-middle-right-hint, .cell-bottom-right-right-hint,
+        .cell-value {
+            border-left: 0px;
+        }
+
+        cspan {
+            width: 2.17vmin;                
+            height: 2.17vmin;
+            overflow: clip;                
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .column-hint, .box-hint, .row-hint {
+            font-size: 1.73vmin;
+            line-height: 2.17vmin;
+            color: gray;
+        }
+
+        .column-hint {
+            text-align: center;
+            vertical-align: bottom;
+            height: 3.47vmin;
+        }
+
+        .box-hint-left {
+            padding-top:1.3vmin;
+            padding-bottom: 0px;
+            height: 2.17vmin;
+            background-clip: content-box;
+        }
+
+        .box-hint {
+            text-align: right;
+            vertical-align: top;
+            padding-bottom:1.3vmin;
+            padding-top: 0px;
+            height: 2.17vmin;
+            background-clip: content-box;
+        }
+
+        .box-hint-padding {
+            padding-top:1.3vmin;
+            padding-bottom: 0px;
+            height: 2.17vmin;
+            background-clip: content-box;
+        }
+
+        td.row-hint {
+            text-align: right;
+            vertical-align: center;
+            max-height: 8.69vmin;
+            max-width: 3.47vmin;
+            width: 3.47vmin;
+            margin: 0px;
+            padding: 0px;
+            padding-right: 0.89vmin;
+
+            div {
+                text-align: center;
+                width: 8.69vmin;
+                height: 3.47vmin;
+                transform: rotate(-90deg);
+                padding: 0px;
+                margin: 0px;
+                text-wrap: wrap;
+                line-height: 1.44vmin;
+                color: gray;
+            }
+        }
+
+        .column-hint-mouse-over {
+            background-color: lightgrey;
+        }
+
+        .row-hint-mouse-over {
+            background-color: lightgrey;
+            background-color: lightgrey;
+        }
+
+        .box-hint-mouse-over {
+            background-color: lightgrey;
+        }
+
+        .cell-mouse-over {
+            background-color: lightskyblue !important;
+        }
+
+        .cell-easy-1 {
+            background-color: #aaffaa;
+        }
+
+        .cell-easy-2 {
+            background-color: #ccffcc;
+        }
+
+        .cell-easy-3 {
+            background-color: #ddffdd;
+        }
+
+        .cell-easy-4 {
+            background-color: #eeffee;
+        }
+
+        .cell-error {
+            background-color: lightcoral;
+        }
+
+        .cell-locked {
+            background-color: lightgray;
+        }
+
+        .cell-computer {
+            border-color: black;
+            color: blue;
+        }
+
+        .selected.cell-value {
+            background-color: #456A80 !important;
+            color: white !important;
+        }
+
+        .cell-hint-clean {
+
+        }
+
+        .cell-hint-needed-elsewhere {
+            font-style: italic;
+            color: orange;
+        }
+
+        .cell-hint-needed-elsewhere-removed {
+            font-style: italic;
+            text-decoration: line-through;
+            text-decoration-color: red;
+            color: orange;
+        }
+
+        .cell-hint-removed {
+            text-decoration: line-through;
+            text-decoration-color: red;
+            color: darkred;
+        }
+        
+        .current-move {
+            background-color: color-mix(in srgb, lightskyblue, white);
+        }
+
+    </style>
+    <script language="JavaScript">
+        var clicked = null;
+        var rows = new Array(9);
+        var columns = new Array(9);
+        var boxes = new Array(3);
+        var grid = new Array(9);
+        var overCell = null;
+        var stack = [];
+        var playing = false;
+        var featuresDisabled = new Set();
+
+        function init() {
+            const urlParams = new URLSearchParams(window.location.search);
+            var startParam = urlParams.get('start');
+            var startRows = ((startParam != null) ? startParam : ";;;;;;;;").split(/;/);
+            if (startRows.length > 9) {
+                startRows.splice(9);
+            }
+
+            const startGrid = [];
+            for (startRow of startRows) {
+                var row = new Array(9);
+                var columnIndex = 0;
+                var hadValue = false;
+                for (var i = 0; i < startRow.length; i++) {
+                    const ch = startRow.charAt(i);
+                    if ((ch >= '1') && (ch <= '9')) {
+                        row[columnIndex++] = ch.charCodeAt(0) - 48;
+                        hadValue = true;
+                    } else if (ch == '_') {
+                        row[columnIndex++] = null;
+                        hadValue = true;
+                    } else if (ch == ',') {
+                        if (hadValue) {
+                            hadValue = false;
+                        } else {
+                            row[columnIndex++] = null;
+                        }
+                    }
+                    if (columnIndex > 8) break;
+                }
+                while (columnIndex < 9) row[columnIndex++] = null;
+                startGrid.push(row);
+            }
+            while (startGrid.length < 9) startGrid.push([null, null, null, null, null, null, null, null, null]);
+            
+            var startPosition = null;
+
+            for (var boxRow = 1; boxRow <= 3; boxRow++) {
+                boxes[boxRow-1] = new Array(3);
+                for (var boxColumn = 1; boxColumn <= 3; boxColumn++) {
+                    boxes[boxRow-1][boxColumn-1] = {
+                        hintElement: document.getElementById("box-" + boxRow + "-" + boxColumn + "-hint"),
+                        cells: []
+                    }
+                }
+            }
+
+            for (var currentColumn = 1; currentColumn <= 9; currentColumn++) {
+                columns[currentColumn-1] = {
+                    hintElement: document.getElementById("column-" + currentColumn + "-hint"),
+                    cells: new Array(9)
+                };
+            }
+
+            for (var currentRow = 1; currentRow <= 9; currentRow++) {
+                grid[currentRow-1] = new Array(9);
+                rows[currentRow-1] = {
+                    hintElement: document.getElementById("row-" + currentRow + "-hint"),
+                    cells: grid[currentRow-1]
+                };
+
+                for (var currentColumn = 1; currentColumn <= 9; currentColumn++) {
+                    var baseId = "cell-" + currentRow + "-" + currentColumn;
+                    var cell = {
+                        value: startGrid[currentRow - 1][currentColumn - 1],
+                        locked: false,
+                        computer: false,
+                        element: document.getElementById(baseId),
+                        leftHintElement:  document.getElementById(baseId + "-left-hint"),
+                        rightHintElement: document.getElementById(baseId + "-right-hint"),
+                        rowNumber: currentRow,
+                        columnNumber: currentColumn,
+                        row: rows[currentRow-1],
+                        column: columns[currentColumn-1],
+                        box: boxes[Math.floor((currentRow-1)/3)][Math.floor((currentColumn-1)/3)],
+                        explicitlyRemoved: new Set()
+                    };
+
+
+                    if (cell.value != null) {
+                        cell.element.innerText = (cell.value == null) ? "" : ("" + cell.value);
+                        addClassToCell(cell, "cell-locked");
+                        cell.locked = true;
+                    }
+                    
+                    cell.row.cells[currentColumn-1] = cell;
+                    cell.column.cells[currentRow-1] = cell;
+                    cell.box.cells.push(cell);
+
+                    (function(cell) {
+                        eachCellPart(cell, function(e) {
+                            e.addEventListener("click",     function(event) { clickCell(event, cell); });
+                            e.addEventListener("mouseover", function(event) { enterCell(event, cell); });
+                            e.addEventListener("mousemove", function(event) { enterCell(event, cell); });
+                            e.addEventListener("mouseout",  function(event) { exitCell(event, cell); });
+                        });
+                    })(cell);
+                }
+            }
+
+            eachCell(function(cell) {
+                cell.competing = new Set([...cell.column.cells, ...cell.row.cells, ...cell.box.cells]);
+                cell.competing.delete(cell);
+            });
+
+            for (const row of grid) {
+                for (const cell of row) {
+                    analyze(cell, true);
+                }
+            }
+
+            analyzeCells();
+        }
+
+        function eachCell(fun) {
+            for (const row of grid) {
+                for (const cell of row) {
+                    fun(cell)
+                }
+            }
+        }
+
+        function eachUnlockedCell(fun) {
+            for (const row of grid) {
+                for (const cell of row) {
+                    if (!cell.locked) {
+                        fun(cell)
+                    }
+                }
+            }
+        }
+
+        function each(list, fun) {
+            for (const entry of list) {
+                fun(entry);
+            }
+        }
+
+        function eachCellPart(cell, fun) {
+            each([cell.leftHintElement, cell.element, cell.rightHintElement], fun);                
+        }
+
+        function addClassToCell(cell, ...cellClasses) {
+            eachCellPart(cell, function(element) {
+                for (const cellClass of cellClasses) {
+                    element.classList.add(cellClass);
+                }
+            });
+        }
+
+        function removeClassFromCell(cell, ...cellClasses) {
+            eachCellPart(cell, function(element) {
+                for (const cellClass of cellClasses) {
+                    element.classList.remove(cellClass);
+                }
+            });
+        }
+
+        function clickCell(event, cell) {
+            if (clicked != null) {
+                eachCellPart(clicked, function(element) {
+                    element.classList.remove("selected");
+                });
+                cellToExit = clicked;
+                clicked = null;
+                exitCell(event, cellToExit);
+                if (cellToExit === cell) {
+                    document.getElementById("lock").innerHTML = "";
+                    return;
+                }
+            }
+
+            enterCell(event, cell);
+            clicked = cell;
+            document.getElementById("lock").innerHTML = cell.locked ? "&#x1f513;" : "&#x1f512;";
+
+            eachCellPart(cell, function(element) {
+                element.classList.add("selected");
+            });
+        }
+
+        function enterCell(event, cell) {
+            if (clicked == null) {
+                overCell = cell;
+
+                cell.box.hintElement.classList.add("box-hint-mouse-over");
+                cell.row.hintElement.classList.add("row-hint-mouse-over");
+                cell.column.hintElement.classList.add("column-hint-mouse-over");
+
+                cell.leftHintElement.classList.add("cell-mouse-over");
+                cell.element.classList.add("cell-mouse-over");
+                cell.rightHintElement.classList.add("cell-mouse-over");
+            }
+        }
+
+        function exitCell(event, cell) {     
+            if (clicked == null) {   
+                overCell = null;
+
+                cell.box.hintElement.classList.remove("box-hint-mouse-over");
+                cell.row.hintElement.classList.remove("row-hint-mouse-over");
+                cell.column.hintElement.classList.remove("column-hint-mouse-over");
+
+                cell.leftHintElement.classList.remove("cell-mouse-over");
+                cell.element.classList.remove("cell-mouse-over");
+                cell.rightHintElement.classList.remove("cell-mouse-over");
+            }
+        }
+
+        function keyPress(event) {     
+            var key = event.keyCode;
+            if (key == 32 || key == 48 || key == 127) {
+                eraseCell(); 
+            } else if (key > 48 && key <= 57) {
+                enterDigit(key - 48);
+            } else {
+                alert(key);
+            }
+            
+        }
+
+        function enterDigit(value) {
+            var cell = (clicked != null) ? clicked : overCell;
+
+            if (cell != null) {
+                if (cell.locked) return;
+
+                if (value != cell.value) {
+                    cell.element.innerText = '' + value;                    
+                    cell.value = value;
+                    analyze(cell);
+                }
+            }                
+        }
+
+        function markUnsuitable() {
+            var cell = (clicked != null) ? clicked : overCell;
+
+            if (cell != null) {
+                if (cell.value == null) return;
+
+                cell.explicitlyRemoved.add(cell.value);
+                cell.value = null;
+                cell.element.innerText = '';
+                analyze(cell);
+            }                
+        }
+
+        function unmarkUnsuitable() {
+            var cell = (clicked != null) ? clicked : overCell;
+
+            if (cell != null) {
+                if (cell.value == null) return;
+
+                cell.explicitlyRemoved.delete(cell.value);
+                analyze(cell);
+            }                
+        }
+
+        function eraseCell() {
+            var cell = (clicked != null) ? clicked : overCell;
+
+            if (cell != null) {
+                if (cell.locked) return;
+
+                if (cell.value != null) {
+                    cell.element.innerText = '';
+                    cell.value = null;
+                    analyze(cell);
+                }
+            }
+        }
+
+        function toggleCellLock() {
+            var cell = (clicked != null) ? clicked : overCell;
+
+            if (cell != null) {
+                if (cell.locked) {                        
+                    cell.locked = false;
+                    removeClassFromCell("cell-locked");
+                } else {
+                    if (cell.value == null) return;
+                    cell.locked = true;
+                    addClassToCell(cell, "cell-locked");
+                }
+                document.getElementById("lock").innerHTML = cell.locked ? "&#x1f513;" : "&#x1f512;";
+                analyze(cell);
+            }
+        }
+
+        function analyze(modifiedCell, skipCellHints) {
+            if (modifiedCell) {
+                groupHint(modifiedCell.column, !featuresDisabled.has("show-col-hints"));
+                groupHint(modifiedCell.row,    !featuresDisabled.has("show-col-hints"));
+                groupHint(modifiedCell.box,    !featuresDisabled.has("show-col-hints"));
+            }
+
+            return skipCellHints ? null : analyzeCells();
+        }
+
+        function analyzeCells() {
+            var errorsFound = false;
+            var optionsByEase = new Array(9);
+            for (var i = 0; i < 9; i++) optionsByEase[i] = [];
+            var fillCount = 0;
+
+            eachCell(function (cell) {
+                // reset
+                removeClassFromCell(cell, "cell-easy-1", "cell-easy-2", "cell-easy-3", "cell-easy-4", "cell-error");
+                cell.leftHintElement.innerHTML = "";
+                cell.rightHintElement.innerHTML = "";
+                cell.available = new Set();
+                cell.neededElsewhere = new Set();
+
+                if (cell.value != null) {
+                    fillCount++;
+                }
+
+                if (cell.locked) {
+                    cell.available.add(cell.value);
+                    cell.leftHintElement.innerHTML = "&#x1F512;";
+                    cell.cleanOptions = new Set();
+                } else {
+                    cell.available = new Set();
+
+                    for (var value = 1; value <= 9; value++) {
+                        var i = value - 1;
+                        if (
+                            cell.column.allows[i] &&
+                            cell.row.allows[i] &&
+                            cell.box.allows[i]
+                        ) {
+                            cell.available.add(value);
+                        }
+                    }
+
+                    cell.cleanOptions = new Set(cell.available);
+                    for (explicitlyRemoved of cell.explicitlyRemoved) cell.cleanOptions.delete(explicitlyRemoved);
+                }
+
+                if (cell.computer) {
+                    addClassToCell(cell, "cell-computer");
+                } else {
+                    removeClassFromCell(cell, "cell-computer");
+                }
+            });
+
+            if ((fillCount == 81) && !errorsFound) return null;
+
+            var keepLooking = playing || featuresDisabled.has("exclude-needed-elsehwhere");
+            while (keepLooking) {
+                keepLooking = false;
+                eachUnlockedCell(function (cell) {
+                    if (cell.cleanOptions.size > 0) {
+                        for (const competing of cell.competing) {
+                            if (!competing.locked) {
+                                var competingValue = null;
+                                if ((competing.value == null) && (competing.cleanOptions.size == 1)) {
+                                    competingValue = competing.cleanOptions.values().next().value;
+                                }
+                                if ((competingValue != null) && cell.cleanOptions.has(competingValue)) {
+                                    keepLooking = playing || !featuresDisabled.has("exclude-needed-elsehwhere-deep");
+                                    cell.cleanOptions.delete(competingValue);
+                                    cell.neededElsewhere.add(competingValue);
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            eachUnlockedCell(function (cell) {
+                if (cell.value != null) {
+                    const valueIndex = cell.value - 1;
+                    if (
+                        (cell.box.counts[valueIndex] > 1) ||
+                        (cell.row.counts[valueIndex] > 1) ||
+                        (cell.column.counts[valueIndex] > 1)
+                    ) {
+                        errorsFound = true;
+                        addClassToCell(cell, "cell-error");
+                        for (const competing of cell.competing) {
+                            if ((competing.value == cell.value) && !competing.locked) {
+                                addClassToCell(competing, "cell-error");
+                            }
+                        }
+                    }
+                }                    
+
+                if ((cell.value == null) && (cell.cleanOptions.size > 0) && !cell.locked) {
+                    const numOptions = cell.cleanOptions.size;
+
+                    var cellOptions = 
+                         Array.from(cell.cleanOptions)
+                        .sort()
+                        .map((option) => {return { cell: cell, value: option, outOf: numOptions}});
+
+                    for (const option of cellOptions) {
+                        optionsByEase[numOptions - 1].push(option);
+                    }
+                }
+
+                if ((cell.value == null) && (cell.cleanOptions.size == 0)) {
+                    errorsFound = true;
+                    addClassToCell(cell, "cell-error");
+                }
+
+                var cleanOptions =
+                    Array.from(cell.cleanOptions)
+                    .sort()
+                    .map((n) => '<cspan class="cell-hint-clean">' + n + '</cspan>');
+
+                var neededElsewhere = 
+                    Array.from(setDifference(cell.neededElsewhere, cell.explicitlyRemoved))
+                    .sort()
+                    .map((n) => '<cspan class="cell-hint-needed-elsewhere">' + n + '</cspan>');
+
+                var neededElsewhereAndExplicitlyRemoved = 
+                    Array.from(setIntersection(cell.neededElsewhere, cell.explicitlyRemoved))
+                    .sort()
+                    .map((n) => '<cspan class="cell-hint-needed-elsewhere-removed">' + n + '</cspan>');
+
+                var explicitlyRemoved = 
+                    Array.from(setDifference(cell.explicitlyRemoved, cell.neededElsewhere))
+                    .sort()
+                    .map((n) => '<cspan class="cell-hint-removed">' + n + '</cspan>');
+
+
+                var leftHints = featuresDisabled.has("show-cell-hints") ? [] : [...cleanOptions];
+
+                var rightHints =
+                    neededElsewhere
+                    .concat(neededElsewhereAndExplicitlyRemoved)
+                    .concat(explicitlyRemoved);
+                
+                if ((rightHints.length > 4) && (leftHints.length < 4)) {
+                    const count = 4 - leftHints.length;
+                    leftHints = leftHints.concat(rightHints.slice(0, count));8
+                    rightHints.splice(0, count);
+                } else if (leftHints.length > 4) {
+                    const count = leftHints.length - 4;
+                    rightHints = leftHints.slice(4, leftHints.length).concat(rightHints);
+                    leftHints.splice(4, count);
+                }
+
+                if ((cell.available.size == 0) && (cell.value == null)) {11
+                    cell.leftHintElement.innerHTML = "&#10008";
+                    cell.rightHintElement.innerHTML = "";
+                    eachCellPart(cell, function(element) {
+                        element.classList.add("cell-error");
+                    });
+                } else {
+                    if (cleanOptions.length < 9) {
+                        cell.leftHintElement.innerHTML = leftHints.join("<br/>");
+                        cell.rightHintElement.innerHTML = rightHints.join("<br/>");
+                    }
+                    
+                    if (!featuresDisabled.has("show-cell-ease")) {
+                        if (cleanOptions.length < 5) {
+                            if ((cell.value == null) && (cleanOptions.length > 0) && (cleanOptions.length < 5)) {
+                                eachCellPart(cell, function(element) {
+                                    element.classList.add("cell-easy-" + cleanOptions.length);
+                                });
+                            }
+                        }
+                    }
+                }
+            });
+
+            var allOptions = [];
+            if (!errorsFound) {
+                for (var i = 0; i < 9; i++) {
+                    const options = optionsByEase[i];
+                    if (options.length > 0) {
+                        if (i == 0) {
+                            allOptions.push(options);
+                        } else {
+                            const firstCell = options[0].cell;
+                            for (const option of options) {
+                                if (option.cell === firstCell) {
+                                    allOptions.push([ option ] );
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }                    
+            }
+            return allOptions;
+        }
+
+        function setDifference(a, b) {
+            r = new Set(a);
+            for (const e of b) {
+                r.delete(e);
+            }
+            return r;
+        }
+
+        function setIntersection(a, b) {
+            r = new Set();
+            for (const e of a) {
+                if (b.has(e)) {
+                    r.add(e);
+                }
+            }
+            return r;
+        }
+
+        function groupHint(group, show) {
+            var counts = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+            group.allows = [ true, true, true, true, true, true, true, true, true ];
+            for (var i = 0; i < 9; i++) {
+                var value = group.cells[i].value;
+                if (value != null) {
+                    counts[value - 1]++;
+                    group.allows[value - 1] = false;
+                }
+            }
+            group.counts = counts;
+
+            var available = [];                
+            for (var i = 0; i < 9; i++) {
+                if (counts[i] < 1) available.push(i + 1);
+            }
+
+            group.available = available;
+
+            if ((available.length == 0) || !show) {
+                group.hintElement.innerHTML = "";
+            } else if (available.length == 9) {
+                group.hintElement.innerHTML = "<div>1...9</div>";
+            } else {
+                group.hintElement.innerHTML = "<div>" + available.join("\u200b") + "</div>";
+            }
+        }
+
+        function play() {
+            playing = !playing;
+
+            if (playing) {
+                document.getElementById("play").innerText = "\u23f8";
+                const state = {
+                    index: -1,
+                    options: analyze()
+                };
+
+                stack.push(state);
+                window.setTimeout(think, 100);
+            } else {
+                document.getElementById("play").innerText = "\u23f5";
+            }
+        }
+
+        function think() {
+            eachCell(function (cell) {
+                removeClassFromCell(cell, "current-move");
+            });
+
+            if (!playing) {
+                console.log("Will top thinking.")
+                return;
+            }
+
+            if (stack.length < 1) {
+                // No solution found.
+                console.log("No solution found.");
+                playing = false;
+                alert("\u2639");
+                return;
+            }
+
+            const state = stack.pop();
+
+            if (state.options == null) {
+                alert("It's good!");
+                return;
+            }   
+
+            if (state.index >= 0) {
+                const optionBundle = state.options[state.index];
+                for (const option of optionBundle) {
+                    const cell = option.cell;
+
+                    cell.value = null;
+                    cell.computer = false;
+                    cell.element.innerText = '';    
+
+                    console.log("Clearing (" + option.cell.rowNumber + ", " + option.cell.columnNumber + ")");
+                    analyze(cell, true);
+                }
+            }
+
+            state.index++;
+
+            if (state.index >= state.options.length) {
+                // ran out of options.
+                // backtrack.
+                analyzeCells();
+                console.log("That didn't work. Backtracking.");
+            } else {
+                stack.push(state);
+
+                const optionBundle = state.options[state.index];
+
+                for (const option of optionBundle) {
+                    const cell = option.cell;
+
+                    cell.value = option.value;
+                    cell.computer = true;
+                    cell.element.innerText = '' + cell.value;
+
+                    console.log("Trying  (" + option.cell.rowNumber + ", " + option.cell.columnNumber + ") with " + option.value);
+
+                    analyze(option.cell, true);
+                }
+
+                const newState = {
+                    index: -1,
+                    options: analyzeCells()
+                };
+
+                for (const option of optionBundle) {
+                    addClassToCell(option.cell, "current-move");
+                }
+
+                stack.push(newState);
+            }
+
+            const pauseTime = Math.pow(2, parseInt(document.getElementById("thinkTime").value) / 10);
+            window.setTimeout(think, pauseTime);
+        }
+
+        function toggleFeature(event, checkbox) {
+            if (checkbox.checked) {
+                featuresDisabled.delete(checkbox.name);
+            } else {
+                featuresDisabled.add(checkbox.name);
+            }
+            for (var i = 0; i < 9; i++) {
+                for (const row of rows) groupHint(rows[i], !featuresDisabled.has("show-row-hints"));
+                for (const col of columns) groupHint(columns[i], !featuresDisabled.has("show-col-hints"));
+            }
+            for (var i = 0; i < 3; i++) {
+                for (var j = 0; j < 3; j++) {
+                    groupHint(boxes[i][j], !featuresDisabled.has("show-box-hints"));
+                }
+            }
+
+            analyzeCells();
+        }
+
+    </script>
+<script type="text/javascript" src="https://tiiny.host/ad-script.js"></script><script defer="" data-domain="sudokick.tiiny.site" src="https://analytics.tiiny.site/js/plausible.js"></script></head>
+<body onload="init();" onkeypress="keyPress(event);">
+    <div id="board-div">
+        <table class="board">
+            <tbody>
+                <tr class="board-top">
+                    <td id="board-corner"></td>
+                    <td class="column-hint" colspan="3" id="column-1-hint">1 2 3</td>
+                    <td class="column-hint" colspan="3" id="column-2-hint">4 5 6</td>
+                    <td class="column-hint" colspan="3" id="column-3-hint">7 8 9</td>
+                    <td class="column-padding"></td>
+                    <td class="column-hint" colspan="3" id="column-4-hint">1 4 7</td>
+                    <td class="column-hint" colspan="3" id="column-5-hint">2 5 6</td>
+                    <td class="column-hint" colspan="3" id="column-6-hint">3 6 9</td>
+                    <td class="column-padding"></td>
+                    <td class="column-hint" colspan="3" id="column-7-hint">1 5 9</td>
+                    <td class="column-hint" colspan="3" id="column-8-hint">2 6 7</td>
+                    <td class="column-hint" colspan="3" id="column-9-hint">3 4 8</td>
+                </tr>
+                <tr class="row">
+                    <td class="row-hint" id="row-1-hint"></td>
+                    <td class="cell-top-left-left-hint cell-hint" id="cell-1-1-left-hint"></td><td class="cell-top-value cell-value" id="cell-1-1"></td><td class="cell-top-left-right-hint cell-hint" id="cell-1-1-right-hint"></td>
+                    <td class="cell-top-middle-left-hint cell-hint" id="cell-1-2-left-hint"></td><td class="cell-top-value cell-value" id="cell-1-2"></td><td class="cell-top-middle-right-hint cell-hint" id="cell-1-2-right-hint"></td>
+                    <td class="cell-top-right-left-hint cell-hint" id="cell-1-3-left-hint"></td><td class="cell-top-value cell-value" id="cell-1-3"></td><td class="cell-top-right-right-hint cell-hint" id="cell-1-3-right-hint"></td>
+                    <td class="cell-padding-top"></td>
+                    <td class="cell-top-left-left-hint cell-hint" id="cell-1-4-left-hint"></td><td class="cell-top-value cell-value" id="cell-1-4"></td><td class="cell-top-left-right-hint cell-hint" id="cell-1-4-right-hint"></td>
+                    <td class="cell-top-middle-left-hint cell-hint" id="cell-1-5-left-hint"></td><td class="cell-top-value cell-value" id="cell-1-5"></td><td class="cell-top-middle-right-hint cell-hint" id="cell-1-5-right-hint"></td>
+                    <td class="cell-top-right-left-hint cell-hint" id="cell-1-6-left-hint"></td><td class="cell-top-value cell-value" id="cell-1-6"></td><td class="cell-top-right-right-hint cell-hint" id="cell-1-6-right-hint"></td>
+                    <td class="cell-padding-top"></td>
+                    <td class="cell-top-left-left-hint cell-hint" id="cell-1-7-left-hint"></td><td class="cell-top-value cell-value" id="cell-1-7"></td><td class="cell-top-left-right-hint cell-hint" id="cell-1-7-right-hint"></td>
+                    <td class="cell-top-middle-left-hint cell-hint" id="cell-1-8-left-hint"></td><td class="cell-top-value cell-value" id="cell-1-8"></td><td class="cell-top-middle-right-hint cell-hint" id="cell-1-8-right-hint"></td>
+                    <td class="cell-top-right-left-hint cell-hint" id="cell-1-9-left-hint"></td><td class="cell-top-value cell-value" id="cell-1-9"></td><td class="cell-top-right-right-hint cell-hint" id="cell-1-9-right-hint"></td>
+                </tr>
+                <tr class="row">
+                    <td class="row-hint" id="row-2-hint"></td>
+                    <td class="cell-middle-left-left-hint cell-hint" id="cell-2-1-left-hint"></td><td class="cell-middle-value cell-value" id="cell-2-1"></td><td class="cell-middle-left-right-hint cell-hint" id="cell-2-1-right-hint"></td>
+                    <td class="cell-middle-middle-left-hint cell-hint" id="cell-2-2-left-hint"></td><td class="cell-middle-value cell-value" id="cell-2-2"></td><td class="cell-middle-middle-right-hint cell-hint" id="cell-2-2-right-hint"></td>
+                    <td class="cell-middle-right-left-hint cell-hint" id="cell-2-3-left-hint"></td><td class="cell-middle-value cell-value" id="cell-2-3"></td><td class="cell-middle-right-right-hint cell-hint" id="cell-2-3-right-hint"></td>
+                    <td class="cell-padding-middle"></td>
+                    <td class="cell-middle-left-left-hint cell-hint" id="cell-2-4-left-hint"></td><td class="cell-middle-value cell-value" id="cell-2-4"></td><td class="cell-middle-left-right-hint cell-hint" id="cell-2-4-right-hint"></td>
+                    <td class="cell-middle-middle-left-hint cell-hint" id="cell-2-5-left-hint"></td><td class="cell-middle-value cell-value" id="cell-2-5"></td><td class="cell-middle-middle-right-hint cell-hint" id="cell-2-5-right-hint"></td>
+                    <td class="cell-middle-right-left-hint cell-hint" id="cell-2-6-left-hint"></td><td class="cell-middle-value cell-value" id="cell-2-6"></td><td class="cell-middle-right-right-hint cell-hint" id="cell-2-6-right-hint"></td>
+                    <td class="cell-padding-middle"></td>
+                    <td class="cell-middle-left-left-hint cell-hint" id="cell-2-7-left-hint"></td><td class="cell-middle-value cell-value" id="cell-2-7"></td><td class="cell-middle-left-right-hint cell-hint" id="cell-2-7-right-hint"></td>
+                    <td class="cell-middle-middle-left-hint cell-hint" id="cell-2-8-left-hint"></td><td class="cell-middle-value cell-value" id="cell-2-8"></td><td class="cell-middle-middle-right-hint cell-hint" id="cell-2-8-right-hint"></td>
+                    <td class="cell-middle-right-left-hint cell-hint" id="cell-2-9-left-hint"></td><td class="cell-middle-value cell-value" id="cell-2-9"></td><td class="cell-middle-right-right-hint cell-hint" id="cell-2-9-right-hint"></td>
+                </tr>
+                <tr class="row">
+                    <td class="row-hint" id="row-3-hint"></td>
+                    <td class="cell-bottom-left-left-hint cell-hint" id="cell-3-1-left-hint"></td><td class="cell-bottom-value cell-value" id="cell-3-1"></td><td class="cell-bottom-left-right-hint cell-hint" id="cell-3-1-right-hint"></td>
+                    <td class="cell-bottom-middle-left-hint cell-hint" id="cell-3-2-left-hint"></td><td class="cell-bottom-value cell-value" id="cell-3-2"></td><td class="cell-bottom-middle-right-hint cell-hint" id="cell-3-2-right-hint"></td>
+                    <td class="cell-bottom-right-left-hint cell-hint" id="cell-3-3-left-hint"></td><td class="cell-bottom-value cell-value" id="cell-3-3"></td><td class="cell-bottom-right-right-hint cell-hint" id="cell-3-3-right-hint"></td>
+                    <td class="cell-padding-middle"></td>
+                    <td class="cell-bottom-left-left-hint cell-hint" id="cell-3-4-left-hint"></td><td class="cell-bottom-value cell-value" id="cell-3-4"></td><td class="cell-bottom-left-right-hint cell-hint" id="cell-3-4-right-hint"></td>
+                    <td class="cell-bottom-middle-left-hint cell-hint" id="cell-3-5-left-hint"></td><td class="cell-bottom-value cell-value" id="cell-3-5"></td><td class="cell-bottom-middle-right-hint cell-hint" id="cell-3-5-right-hint"></td>
+                    <td class="cell-bottom-right-left-hint cell-hint" id="cell-3-6-left-hint"></td><td class="cell-bottom-value cell-value" id="cell-3-6"></td><td class="cell-bottom-right-right-hint cell-hint" id="cell-3-6-right-hint"></td>
+                    <td class="cell-padding-middle"></td>
+                    <td class="cell-bottom-left-left-hint cell-hint" id="cell-3-7-left-hint"></td><td class="cell-bottom-value cell-value" id="cell-3-7"></td><td class="cell-bottom-left-right-hint cell-hint" id="cell-3-7-right-hint"></td>
+                    <td class="cell-bottom-middle-left-hint cell-hint" id="cell-3-8-left-hint"></td><td class="cell-bottom-value cell-value" id="cell-3-8"></td><td class="cell-bottom-middle-right-hint cell-hint" id="cell-3-8-right-hint"></td>
+                    <td class="cell-bottom-right-left-hint cell-hint" id="cell-3-9-left-hint"></td><td class="cell-bottom-value cell-value" id="cell-3-9"></td><td class="cell-bottom-right-right-hint cell-hint" id="cell-3-9-right-hint"></td>
+                </tr>
+                <tr class="box-hint-row">
+                    <td class="box-hint-left"></td>
+                    <td class="box-hint" colspan="9" id="box-1-1-hint">Box hint here...</td>
+                    <td class="box-hint-padding"></td>
+                    <td class="box-hint" colspan="9" id="box-1-2-hint">Box hint here...</td>
+                    <td class="box-hint-padding"></td>
+                    <td class="box-hint" colspan="9" id="box-1-3-hint">Box hint here...</td>
+                </tr>
+
+                <tr class="row">
+                    <td class="row-hint" id="row-4-hint"></td>
+                    <td class="cell-top-left-left-hint cell-hint" id="cell-4-1-left-hint"></td><td class="cell-top-value cell-value" id="cell-4-1"></td><td class="cell-top-left-right-hint cell-hint" id="cell-4-1-right-hint"></td>
+                    <td class="cell-top-middle-left-hint cell-hint" id="cell-4-2-left-hint"></td><td class="cell-top-value cell-value" id="cell-4-2"></td><td class="cell-top-middle-right-hint cell-hint" id="cell-4-2-right-hint"></td>
+                    <td class="cell-top-right-left-hint cell-hint" id="cell-4-3-left-hint"></td><td class="cell-top-value cell-value" id="cell-4-3"></td><td class="cell-top-right-right-hint cell-hint" id="cell-4-3-right-hint"></td>
+                    <td class="cell-padding-top"></td>
+                    <td class="cell-top-left-left-hint cell-hint" id="cell-4-4-left-hint"></td><td class="cell-top-value cell-value" id="cell-4-4"></td><td class="cell-top-left-right-hint cell-hint" id="cell-4-4-right-hint"></td>
+                    <td class="cell-top-middle-left-hint cell-hint" id="cell-4-5-left-hint"></td><td class="cell-top-value cell-value" id="cell-4-5"></td><td class="cell-top-middle-right-hint cell-hint" id="cell-4-5-right-hint"></td>
+                    <td class="cell-top-right-left-hint cell-hint" id="cell-4-6-left-hint"></td><td class="cell-top-value cell-value" id="cell-4-6"></td><td class="cell-top-right-right-hint cell-hint" id="cell-4-6-right-hint"></td>
+                    <td class="cell-padding-top"></td>
+                    <td class="cell-top-left-left-hint cell-hint" id="cell-4-7-left-hint"></td><td class="cell-top-value cell-value" id="cell-4-7"></td><td class="cell-top-left-right-hint cell-hint" id="cell-4-7-right-hint"></td>
+                    <td class="cell-top-middle-left-hint cell-hint" id="cell-4-8-left-hint"></td><td class="cell-top-value cell-value" id="cell-4-8"></td><td class="cell-top-middle-right-hint cell-hint" id="cell-4-8-right-hint"></td>
+                    <td class="cell-top-right-left-hint cell-hint" id="cell-4-9-left-hint"></td><td class="cell-top-value cell-value" id="cell-4-9"></td><td class="cell-top-right-right-hint cell-hint" id="cell-4-9-right-hint"></td>
+                </tr>
+                <tr class="row">
+                    <td class="row-hint" id="row-5-hint"></td>
+                    <td class="cell-middle-left-left-hint cell-hint" id="cell-5-1-left-hint"></td><td class="cell-middle-value cell-value" id="cell-5-1"></td><td class="cell-middle-left-right-hint cell-hint" id="cell-5-1-right-hint"></td>
+                    <td class="cell-middle-middle-left-hint cell-hint" id="cell-5-2-left-hint"></td><td class="cell-middle-value cell-value" id="cell-5-2"></td><td class="cell-middle-middle-right-hint cell-hint" id="cell-5-2-right-hint"></td>
+                    <td class="cell-middle-right-left-hint cell-hint" id="cell-5-3-left-hint"></td><td class="cell-middle-value cell-value" id="cell-5-3"></td><td class="cell-middle-right-right-hint cell-hint" id="cell-5-3-right-hint"></td>
+                    <td class="cell-padding-middle"></td>
+                    <td class="cell-middle-left-left-hint cell-hint" id="cell-5-4-left-hint"></td><td class="cell-middle-value cell-value" id="cell-5-4"></td><td class="cell-middle-left-right-hint cell-hint" id="cell-5-4-right-hint"></td>
+                    <td class="cell-middle-middle-left-hint cell-hint" id="cell-5-5-left-hint"></td><td class="cell-middle-value cell-value" id="cell-5-5"></td><td class="cell-middle-middle-right-hint cell-hint" id="cell-5-5-right-hint"></td>
+                    <td class="cell-middle-right-left-hint cell-hint" id="cell-5-6-left-hint"></td><td class="cell-middle-value cell-value" id="cell-5-6"></td><td class="cell-middle-right-right-hint cell-hint" id="cell-5-6-right-hint"></td>
+                    <td class="cell-padding-middle"></td>
+                    <td class="cell-middle-left-left-hint cell-hint" id="cell-5-7-left-hint"></td><td class="cell-middle-value cell-value" id="cell-5-7"></td><td class="cell-middle-left-right-hint cell-hint" id="cell-5-7-right-hint"></td>
+                    <td class="cell-middle-middle-left-hint cell-hint" id="cell-5-8-left-hint"></td><td class="cell-middle-value cell-value" id="cell-5-8"></td><td class="cell-middle-middle-right-hint cell-hint" id="cell-5-8-right-hint"></td>
+                    <td class="cell-middle-right-left-hint cell-hint" id="cell-5-9-left-hint"></td><td class="cell-middle-value cell-value" id="cell-5-9"></td><td class="cell-middle-right-right-hint cell-hint" id="cell-5-9-right-hint"></td>
+                </tr>
+                <tr class="row">
+                    <td class="row-hint" id="row-6-hint"></td>
+                    <td class="cell-bottom-left-left-hint cell-hint" id="cell-6-1-left-hint"></td><td class="cell-bottom-value cell-value" id="cell-6-1"></td><td class="cell-bottom-left-right-hint cell-hint" id="cell-6-1-right-hint"></td>
+                    <td class="cell-bottom-middle-left-hint cell-hint" id="cell-6-2-left-hint"></td><td class="cell-bottom-value cell-value" id="cell-6-2"></td><td class="cell-bottom-middle-right-hint cell-hint" id="cell-6-2-right-hint"></td>
+                    <td class="cell-bottom-right-left-hint cell-hint" id="cell-6-3-left-hint"></td><td class="cell-bottom-value cell-value" id="cell-6-3"></td><td class="cell-bottom-right-right-hint cell-hint" id="cell-6-3-right-hint"></td>
+                    <td class="cell-padding-middle"></td>
+                    <td class="cell-bottom-left-left-hint cell-hint" id="cell-6-4-left-hint"></td><td class="cell-bottom-value cell-value" id="cell-6-4"></td><td class="cell-bottom-left-right-hint cell-hint" id="cell-6-4-right-hint"></td>
+                    <td class="cell-bottom-middle-left-hint cell-hint" id="cell-6-5-left-hint"></td><td class="cell-bottom-value cell-value" id="cell-6-5"></td><td class="cell-bottom-middle-right-hint cell-hint" id="cell-6-5-right-hint"></td>
+                    <td class="cell-bottom-right-left-hint cell-hint" id="cell-6-6-left-hint"></td><td class="cell-bottom-value cell-value" id="cell-6-6"></td><td class="cell-bottom-right-right-hint cell-hint" id="cell-6-6-right-hint"></td>
+                    <td class="cell-padding-middle"></td>
+                    <td class="cell-bottom-left-left-hint cell-hint" id="cell-6-7-left-hint"></td><td class="cell-bottom-value cell-value" id="cell-6-7"></td><td class="cell-bottom-left-right-hint cell-hint" id="cell-6-7-right-hint"></td>
+                    <td class="cell-bottom-middle-left-hint cell-hint" id="cell-6-8-left-hint"></td><td class="cell-bottom-value cell-value" id="cell-6-8"></td><td class="cell-bottom-middle-right-hint cell-hint" id="cell-6-8-right-hint"></td>
+                    <td class="cell-bottom-right-left-hint cell-hint" id="cell-6-9-left-hint"></td><td class="cell-bottom-value cell-value" id="cell-6-9"></td><td class="cell-bottom-right-right-hint cell-hint" id="cell-6-9-right-hint"></td>
+                </tr>
+                <tr class="box-hint">
+                    <td class="box-hint-left"></td>
+                    <td class="box-hint" colspan="9" id="box-2-1-hint">Box hint here...</td>
+                    <td class="box-hint-padding"></td>
+                    <td class="box-hint" colspan="9" id="box-2-2-hint">Box hint here...</td>
+                    <td class="box-hint-padding"></td>
+                    <td class="box-hint" colspan="9" id="box-2-3-hint">Box hint here...</td>
+                </tr>
+
+                <tr class="row">
+                    <td class="row-hint" id="row-7-hint"></td>
+                    <td class="cell-top-left-left-hint cell-hint" id="cell-7-1-left-hint"></td><td class="cell-top-value cell-value" id="cell-7-1"></td><td class="cell-top-left-right-hint cell-hint" id="cell-7-1-right-hint"></td>
+                    <td class="cell-top-middle-left-hint cell-hint" id="cell-7-2-left-hint"></td><td class="cell-top-value cell-value" id="cell-7-2"></td><td class="cell-top-middle-right-hint cell-hint" id="cell-7-2-right-hint"></td>
+                    <td class="cell-top-right-left-hint cell-hint" id="cell-7-3-left-hint"></td><td class="cell-top-value cell-value" id="cell-7-3"></td><td class="cell-top-right-right-hint cell-hint" id="cell-7-3-right-hint"></td>
+                    <td class="cell-padding-top"></td>
+                    <td class="cell-top-left-left-hint cell-hint" id="cell-7-4-left-hint"></td><td class="cell-top-value cell-value" id="cell-7-4"></td><td class="cell-top-left-right-hint cell-hint" id="cell-7-4-right-hint"></td>
+                    <td class="cell-top-middle-left-hint cell-hint" id="cell-7-5-left-hint"></td><td class="cell-top-value cell-value" id="cell-7-5"></td><td class="cell-top-middle-right-hint cell-hint" id="cell-7-5-right-hint"></td>
+                    <td class="cell-top-right-left-hint cell-hint" id="cell-7-6-left-hint"></td><td class="cell-top-value cell-value" id="cell-7-6"></td><td class="cell-top-right-right-hint cell-hint" id="cell-7-6-right-hint"></td>
+                    <td class="cell-padding-top"></td>
+                    <td class="cell-top-left-left-hint cell-hint" id="cell-7-7-left-hint"></td><td class="cell-top-value cell-value" id="cell-7-7"></td><td class="cell-top-left-right-hint cell-hint" id="cell-7-7-right-hint"></td>
+                    <td class="cell-top-middle-left-hint cell-hint" id="cell-7-8-left-hint"></td><td class="cell-top-value cell-value" id="cell-7-8"></td><td class="cell-top-middle-right-hint cell-hint" id="cell-7-8-right-hint"></td>
+                    <td class="cell-top-right-left-hint cell-hint" id="cell-7-9-left-hint"></td><td class="cell-top-value cell-value" id="cell-7-9"></td><td class="cell-top-right-right-hint cell-hint" id="cell-7-9-right-hint"></td>
+                </tr>
+                <tr class="row">
+                    <td class="row-hint" id="row-8-hint"></td>
+                    <td class="cell-middle-left-left-hint cell-hint" id="cell-8-1-left-hint"></td><td class="cell-middle-value cell-value" id="cell-8-1"></td><td class="cell-middle-left-right-hint cell-hint" id="cell-8-1-right-hint"></td>
+                    <td class="cell-middle-middle-left-hint cell-hint" id="cell-8-2-left-hint"></td><td class="cell-middle-value cell-value" id="cell-8-2"></td><td class="cell-middle-middle-right-hint cell-hint" id="cell-8-2-right-hint"></td>
+                    <td class="cell-middle-right-left-hint cell-hint" id="cell-8-3-left-hint"></td><td class="cell-middle-value cell-value" id="cell-8-3"></td><td class="cell-middle-right-right-hint cell-hint" id="cell-8-3-right-hint"></td>
+                    <td class="cell-padding-middle"></td>
+                    <td class="cell-middle-left-left-hint cell-hint" id="cell-8-4-left-hint"></td><td class="cell-middle-value cell-value" id="cell-8-4"></td><td class="cell-middle-left-right-hint cell-hint" id="cell-8-4-right-hint"></td>
+                    <td class="cell-middle-middle-left-hint cell-hint" id="cell-8-5-left-hint"></td><td class="cell-middle-value cell-value" id="cell-8-5"></td><td class="cell-middle-middle-right-hint cell-hint" id="cell-8-5-right-hint"></td>
+                    <td class="cell-middle-right-left-hint cell-hint" id="cell-8-6-left-hint"></td><td class="cell-middle-value cell-value" id="cell-8-6"></td><td class="cell-middle-right-right-hint cell-hint" id="cell-8-6-right-hint"></td>
+                    <td class="cell-padding-middle"></td>
+                    <td class="cell-middle-left-left-hint cell-hint" id="cell-8-7-left-hint"></td><td class="cell-middle-value cell-value" id="cell-8-7"></td><td class="cell-middle-left-right-hint cell-hint" id="cell-8-7-right-hint"></td>
+                    <td class="cell-middle-middle-left-hint cell-hint" id="cell-8-8-left-hint"></td><td class="cell-middle-value cell-value" id="cell-8-8"></td><td class="cell-middle-middle-right-hint cell-hint" id="cell-8-8-right-hint"></td>
+                    <td class="cell-middle-right-left-hint cell-hint" id="cell-8-9-left-hint"></td><td class="cell-middle-value cell-value" id="cell-8-9"></td><td class="cell-middle-right-right-hint cell-hint" id="cell-8-9-right-hint"></td>
+                </tr>
+                <tr class="row">
+                    <td class="row-hint" id="row-9-hint"></td>
+                    <td class="cell-bottom-left-left-hint cell-hint" id="cell-9-1-left-hint"></td><td class="cell-bottom-value cell-value" id="cell-9-1"></td><td class="cell-bottom-left-right-hint cell-hint" id="cell-9-1-right-hint"></td>
+                    <td class="cell-bottom-middle-left-hint cell-hint" id="cell-9-2-left-hint"></td><td class="cell-bottom-value cell-value" id="cell-9-2"></td><td class="cell-bottom-middle-right-hint cell-hint" id="cell-9-2-right-hint"></td>
+                    <td class="cell-bottom-right-left-hint cell-hint" id="cell-9-3-left-hint"></td><td class="cell-bottom-value cell-value" id="cell-9-3"></td><td class="cell-bottom-right-right-hint cell-hint" id="cell-9-3-right-hint"></td>
+                    <td class="cell-padding-middle"></td>
+                    <td class="cell-bottom-left-left-hint cell-hint" id="cell-9-4-left-hint"></td><td class="cell-bottom-value cell-value" id="cell-9-4"></td><td class="cell-bottom-left-right-hint cell-hint" id="cell-9-4-right-hint"></td>
+                    <td class="cell-bottom-middle-left-hint cell-hint" id="cell-9-5-left-hint"></td><td class="cell-bottom-value cell-value" id="cell-9-5"></td><td class="cell-bottom-middle-right-hint cell-hint" id="cell-9-5-right-hint"></td>
+                    <td class="cell-bottom-right-left-hint cell-hint" id="cell-9-6-left-hint"></td><td class="cell-bottom-value cell-value" id="cell-9-6"></td><td class="cell-bottom-right-right-hint cell-hint" id="cell-9-6-right-hint"></td>
+                    <td class="cell-padding-middle"></td>
+                    <td class="cell-bottom-left-left-hint cell-hint" id="cell-9-7-left-hint"></td><td class="cell-bottom-value cell-value" id="cell-9-7"></td><td class="cell-bottom-left-right-hint cell-hint" id="cell-9-7-right-hint"></td>
+                    <td class="cell-bottom-middle-left-hint cell-hint" id="cell-9-8-left-hint"></td><td class="cell-bottom-value cell-value" id="cell-9-8"></td><td class="cell-bottom-middle-right-hint cell-hint" id="cell-9-8-right-hint"></td>
+                    <td class="cell-bottom-right-left-hint cell-hint" id="cell-9-9-left-hint"></td><td class="cell-bottom-value cell-value" id="cell-9-9"></td><td class="cell-bottom-right-right-hint cell-hint" id="cell-9-9-right-hint"></td>
+                </tr>
+                <tr class="box-hint">
+                    <td class="box-hint-left"></td>
+                    <td class="box-hint" colspan="9" id="box-3-1-hint">Box hint here...</td>
+                    <td class="box-hint-padding"></td>
+                    <td class="box-hint" colspan="9" id="box-3-2-hint">Box hint here...</td>
+                    <td class="box-hint-padding"></td>
+                    <td class="box-hint" colspan="9" id="box-3-3-hint">Box hint here...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="extras-div">
+        <div style="display: inline-block">
+            <h1>Controls</h1>
+            <table>
+                <tbody>
+                    <tr>
+                        <td class="key" onclick="enterDigit(7);">7</td>
+                        <td class="key" onclick="enterDigit(8);">8</td>
+                        <td class="key" onclick="enterDigit(9);">9</td>
+                        <td class="key" onclick="eraseCell();" title="Erase cell">ðŸ—‘</td>
+                    </tr>
+                    <tr>
+                        <td class="key" onclick="enterDigit(4);">4</td>
+                        <td class="key" onclick="enterDigit(5);">5</td>
+                        <td class="key" onclick="enterDigit(6);">6</td>
+                        <td class="key" onclick="markUnsuitable();" title="Manually mark the value unsuitable" style="color: red;">âœ˜</td>
+                    </tr>
+                    <tr>
+                        <td class="key" onclick="enterDigit(1);">1</td>
+                        <td class="key" onclick="enterDigit(2);">2</td>
+                        <td class="key" onclick="enterDigit(3);">3</td>
+                        <td class="key" onclick="unmarkUnsuitable();" title="Remove the manual unsuitability mark from the value" style="color: green; text-decoration: line-through;">âœ˜</td>
+                    </tr>
+                    <tr>
+                        <td class="key" id="lock" onclick="toggleCellLock();" title="Lock/unlock the cell">ðŸ”’</td>
+                        <td class="key" id="play" onclick="play();" title="Play automatically / run solver">âµ</td>
+                        <td class="key" onclick=""></td>
+                        <td class="key" onclick=""></td>
+                    </tr>
+                </tbody>
+            </table>
+            <h2>Time between moves (1ms - 4s)</h2>
+            <input type="range" min="0" max="120" value="80" class="slider" id="thinkTime">
+            <input type="checkbox" id="show-col-hints" name="show-col-hints" checked="" onclick="toggleFeature(event, this);"><label for="show-col-hints">Show column hints</label>
+            <input type="checkbox" id="show-row-hints" name="show-row-hints" checked="" onclick="toggleFeature(event, this);"><label for="show-row-hints">Show row hints</label>
+            <input type="checkbox" id="show-box-hints" name="show-box-hints" checked="" onclick="toggleFeature(event, this);"><label for="show-box-hints">Show box hints</label>
+            <input type="checkbox" id="show-cell-hints" name="show-cell-hints" checked="" onclick="toggleFeature(event, this);"><label for="show-cell-hints">Show cell hints</label>
+            <input type="checkbox" id="show-cell-ease" name="show-cell-ease" checked="" onclick="toggleFeature(event, this);"><label for="show-cell-ease">Highlight easy cells</label>
+            <input type="checkbox" id="exclude-needed-elsehwhere" name="exclude-needed-elsehwhere" checked="" onclick="toggleFeature(event, this);"><label for="exclude-needed-elsehwhere">Identify numbers required elsewhere</label>
+            <input type="checkbox" id="exclude-needed-elsehwhere-deep" name="exclude-needed-elsehwhere-deep" checked="" onclick="toggleFeature(event, this);"><label for="exclude-needed-elsehwhere-deep">Perform deep analysis for values required elsewhere</label>
+
+        </div>
+    </div>
+
+</body></html>

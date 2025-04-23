@@ -35,41 +35,65 @@ body {
 #wrapper {
   width: 100%;
   height: calc(100vh - 24pt);
+  max-height: calc(100vh - 24pt);
   border: 1px solid gray;
   table-layout: fixed;
 }
 
-table#wrapper thead tr th {
+table#wrapper thead tr,
+table#wrapper thead tr th.editor-header {
+  width: min(100%, max(40vw, 80ch));
   background-color: #f0f0f0;
-  font-family: sans-serif;
-  resize: horizontal;
+  font-family: monospace;
+  resize: none; /* horizontal; */
   overflow-x: scroll;
+  height: 18pt;
 }
 
-table#wrapper tbody tr {
+table#wrapper thead tr th.status-header {
+  background-color: #f0f0f0;
+  font-family: monospace;
+  width: min(58ch, max(20vw, 44ch));
+  max-width: 58ch;
+  resize: none;
+  overflow-x: scroll;
+  height: 18pt;
+}
+
+
+table#wrapper tbody tr,
+table#wrapper tbody tr th,
+table#wrapper tbody tr td#ditor-pane
+table#wrapper tbody tr td#status-pane {
   vertical-align: top;
+  height: calc(100vh - 42pt);
+  max-height: calc(100vh - 42pt);
 }
 
 .editor-pane {
-  width: 40%;
-  height: 100%;
+  width: min(100%, max(40vw, 80ch));
+  height: min(100%, calc(100vh - 42pt));
+  max-height: min(100%, calc(100vh - 42pt));
+  overflow-y: hidden;
+  overflow-x: hidden;
 }
 
-.status-pane {
-  width: 20%;
-  height: 100%;
+td.status-pane {
+  font-family: monospace;
+  width: min(55ch, max(10vw, 44ch));
+  max-width: 55ch;
+  height: calc(100vh - 42pt);
   background-color: #f0f0f0;
   padding: 10px;
   border-left: 1px solid gray;
-}
-
-.status-pane h2 {
-  font-family: sans-serif;
-  font-size: medium;
+  resize: none;
+  overflow-y: scroll;
+  overflow-x: hidden;
 }
 
 table#registers {
   width: 100%;
+  max-height: calc(100vh - 42pt);
   border-collapse: collapse;
   font-family: monospace;
   text-align: left;
@@ -77,27 +101,43 @@ table#registers {
   background-color: #ffffff;
   resize: none;
   table-layout: fixed;
+  overflow-x: scroll;
+  overflow-y: scroll;
 }
 
-table#registers tr,
-table#registers th,
-table#registers td,
-table#registers td div {
+table#registers tbody tr[class^="reg-"] {
   vertical-align: middle;
   overflow: hidden;
   width: 100%;
   line-height: 2ex;
   height: 2.5ex;
+  resize: none;
 }
 
+table#registers tbody tr[class^="reg-"] th[id^="reg-"] {
+  vertical-align: middle;
+  overflow: hidden;
+  width: min(8ex, max(5vw, 8ch));
+  line-height: 2ex;
+  height: 2.5ex;
+  resize: none;
+}
+
+table#registers tbody tr[class^="reg-"] td,
+table#registers tbody tr[class^="reg-"] td div[id^="val-"] {
+  vertical-align: middle;
+  overflow: hidden;
+  width: 100%;
+  line-height: 2ex;
+  height: 2.5ex;
+  resize: none;
+}
 
 table#registers td.registerAccess,
 table#registers td.registerAccess div {
   background-color: blue;
   color: white;
 }
-
-
 
 table#registers tr.reg-special {
   background-color: rgba(255, 192, 0, 0.25);
@@ -151,6 +191,8 @@ textarea {
   width: 100%;
   resize: none;
   font-family: monospace;
+  width: min(55ex, max(20vw, 40em));
+  max-height: calc(100vh - 42pt);
 }
 
 

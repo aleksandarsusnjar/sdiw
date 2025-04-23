@@ -1,0 +1,68 @@
+;; INPUT
+;; 
+;!! $1 <-- input_array ; address of array
+;!! $2 <-- 5           ; array length
+;;
+;; LOCALS
+;;
+;; $9 - largest number
+;; $8 - second largest number
+;; $10 - temp
+;; $11 - temp
+
+;; OUTPUT
+;; 
+;; $1 - sum of two largest
+
+   lw $9, 0($1)
+   addi $1, $1, 4
+   addi $2, $2, -1
+
+   lw $8, 0($1)
+   addi $1, $1, 4
+   addi $2, $2, -1
+
+   slt $10, $9, $8  ; $10 <- 1 if $9 < $8
+   beq $10, $0, continue
+
+   ; swap $9 and $8
+   add $10, $9, $0
+   add $9, $8, $0
+   add $8, $10, $0
+
+continue:
+   beq $2, $0, done
+
+   lw $10, 0($1)
+
+   ; check if we found the new largest
+   slt $11, $9, $10 ; $11 <- 1 if $9 < $10
+   beq $11, $0, nine_is_fine   
+   ; $11 is the new largest value
+   add $8, $9, $0
+   add $9, $10, $0
+   beq $0, $0, next
+
+nine_is_fine:
+   ; check if we found the new 2nd largest
+   slt $11, $8, $10 ; $11 <- 1 if $8 < $10
+   beq $11, $0, next      
+   ; $11 is the new 2nd largest value
+   add $8, $10, $0
+
+next:
+   ; move to the next element
+   addi $1, $1, 4
+   addi $2, $2, -1
+   beq $0, $0, continue
+
+done:
+   add $1, $9, $8
+   jr $31
+
+input_array: 
+    .word 123
+    .word 234
+    .word 345
+    .word 654
+    .word 321
