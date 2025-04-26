@@ -54,7 +54,7 @@ for (let register of REGISTER_NAMES) {
 }
 
 let REGISTERS = new Array(34).fill(0);
-const MEMORY = new Memory();
+let MEMORY = new Memory();
 let LABELS = {};
 let REGISTER_INITIAL_VALUES = {};
 
@@ -67,6 +67,7 @@ function getPC() {
 }
 
 function restartAssembly() {
+	MEMORY = new Memory();
 	LABELS = {};
 	STDIN = "";
 	STDIN_REMAINING = "";
@@ -89,11 +90,13 @@ function assembleLine(lineNumber, address, line) {
 		nextAddress: address,
 		dword: null,
 		gutter: '',
+		error: true
 	}
 
 	let trimmed = line.trim();
 
 	if (trimmed.length === 0) {
+		result.error = false;
 		return result;
 	}
 
@@ -101,40 +104,49 @@ function assembleLine(lineNumber, address, line) {
 		// This is a directive to append content to STDIN
 		// and not an instruction.
 
-		raw = trimmed.slice(3).trim();
-		[text, next,] = parseText(raw, 0);
-		if (next !== raw.length) {
-			result.gutter = " Invalid text literal"
-			return result;
-		}
-		STDIN += text;
-		STDIN_REMAINING = STDIN;
+		try {
+			raw = trimmed.slice(3).trim();
+			[text, next,] = parseText(raw, 0);
+			if (next !== raw.length) {
+				result.gutter = " Invalid text literal"
+				return result;
+			}
+			STDIN += text;
+			STDIN_REMAINING = STDIN;
 
-		result.gutter = "STDIN \u27f5 " + 
-			raw.replaceAll('\\t', '\u2b72')
-			   .replaceAll('\\n', '\u2b07')
-			   .replaceAll('\\r', '\u2b05');
+			result.gutter = "STDIN \u27f5 " + 
+				raw.replaceAll('\\t', '\u2b72')
+				.replaceAll('\\n', '\u2b07')
+				.replaceAll('\\r', '\u2b05');
 
-		for (let controlCode = 0; controlCode < 32; controlCode++) {
-			raw = raw.replaceAll(String.fromCharCode(controlCode), String.fromCharCode(0x2400 + controlCode));
+			for (let controlCode = 0; controlCode < 32; controlCode++) {
+				raw = raw.replaceAll(String.fromCharCode(controlCode), String.fromCharCode(0x2400 + controlCode));
+			}
+			result.error  = false;
+		} catch (e) {
+			result.gutter = e.message;
 		}
-		
+				
 		return result;
 	} else if (trimmed.startsWith(';!!')) {
 		// This is a directive to initialize a register to a numeric value or a label.
+		try {
+			const [, regStart,] = parseSeparator(trimmed, 3);
+			const [registerNumber, operatorStart, regSource] = parseRegister(trimmed, regStart);
+			const [operator, valueStart, operatorSource] = parseSeparator(trimmed, operatorStart, '(=|\u27f5|(<[=-]+))');
+			const [value, valueEnd, valueSource] = parseAddress(trimmed, valueStart);
 
-		const [, regStart,] = parseSeparator(trimmed, 3);
-		const [registerNumber, operatorStart, regSource] = parseRegister(trimmed, regStart);
-		const [operator, valueStart, operatorSource] = parseSeparator(trimmed, operatorStart, '(=|\u27f5|(<[=-]+))');
-		const [value, valueEnd, valueSource] = parseAddress(trimmed, valueStart);
+			if (typeof value === 'number') {
+				REGISTER_INITIAL_VALUES['$' + registerNumber] = new NumberLiteral(value, valueSource);
+			} else {
+				REGISTER_INITIAL_VALUES['$' + registerNumber] = new LabelReference(value, valueSource);
+			}
 
-		if (typeof value === 'number') {
-			REGISTER_INITIAL_VALUES['$' + registerNumber] = new NumberLiteral(value, valueSource);
-		} else {
-			REGISTER_INITIAL_VALUES['$' + registerNumber] = new LabelReference(value, valueSource);
+			result.gutter = `$${registerNumber} \u27f5 ${valueSource} initially`;
+			result.error  = false;
+		} catch (e) {
+			result.gutter = e.message;			
 		}
-
-		result.gutter = `$${registerNumber} \u27f5 ${valueSource} initially`;
 		return result;
 	} else if (trimmed.startsWith(';??')) {
 		// An assertion directive to check if all is good
@@ -154,11 +166,11 @@ function assembleLine(lineNumber, address, line) {
 			MEMORY.write(result.address, result.instruction);
 
 			result.gutter = result.address.toString(16).padStart(8, '.') + ": " + result.instruction.opcode + " | " + result.instruction.description;
-			return result;
+			result.error  = false;
 		} catch (e) {
-			result.gutter = "Doesn't look like: ;?? a <|<=|==|!=|=>|> b.";
-			return result;
+			result.gutter = "Doesn't look like: ;?? a <|<=|==|!=|=>|> b.";			
 		}
+		return result;
 	}
 
 	const forcedAddress = trimmed.match(/^(([1-9][0-9]*)|(0[bB][01]+)|(0[0-7]*)|(0[xX][0-9A-Fa-f]+)):/);
@@ -190,7 +202,10 @@ function assembleLine(lineNumber, address, line) {
 		} else {
 			result.gutter = line;
 		}
+		result.error = false;
 	} else {
+		result.error = false;
+
 		result.length = 4;
 		let pos = 0;
 		[result.mnemonic, pos,] = parseMnemonic(trimmed, 0);
@@ -198,6 +213,7 @@ function assembleLine(lineNumber, address, line) {
 		try {
 			result.args = parseArgs(trimmed.slice(pos));
 		} catch (e) {
+			result.error = true;
 			result.args = null;
 			result.gutter = e.message;
 		}
@@ -206,6 +222,7 @@ function assembleLine(lineNumber, address, line) {
 			try {
 				result.instruction = createInstruction(result.address, result.mnemonic, result.args);
 			} catch (e) {
+				result.error = true;
 				result.instruction = null;
 				result.gutter = e.message;
 			}
@@ -637,8 +654,8 @@ function NumberLiteral(value, source) {
 		return value;
 	};
 
-	this.readRelative = function (origin) {
-		return origin + value;
+	this.readRelative = function (origin, factor) {
+		return origin + value * (factor ?? 1);
 	};
 
 	this.bits = function (fromAddress, bitCount, shift) {
@@ -1011,7 +1028,18 @@ function makeOpcode(address, pattern, params) {
 	return opcode.match(/.{1,4}/g)?.join(' ') ?? '';
 }
 
+const ASCII_CONTROL_CHARS = [
+	"NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL",
+	"BS ", "TAB", "LF ", "VT ", "FF ", "CR ", "SO ", "SI ",
+	"DLE", "DC1", "DC2", "DC3", "DC4", "NAK", "SYN", "ETB",
+	"CAN", "EM ", "SUB", "ESC", "FS ", "GS ", "RS ", "US "
+]
+
 function describeValue(value) {
+	if (typeof value == 'string') {
+		return value;
+	}
+
 	let unsignedValue = unsigned(value);
 
 	let dec_signed = value.toString(10).padStart(11, ' ');
@@ -1019,14 +1047,8 @@ function describeValue(value) {
 	let hex = '0x' + unsignedValue.toString(16).padStart(8, '.');
 
 	let char;
-	if (value == 9) {
-		char = 'TAB';
-	} else if (value == 10) {
-		char = 'LF ';
-	} else if (value == 13) {
-		char = 'CR ';
-	} else if (value == 0) {
-		char = 'NUL';
+	if (value < 32) {
+		char = ASCII_CONTROL_CHARS[value];
 	} else if (unsignedValue > 0 && unsignedValue < 65536) {
 		char = String.fromCharCode(unsignedValue);
 		if (char.match(/\p{Letter}|\p{Number}|\p{Punctuation}|\p{Symbol}/u)) {
@@ -1149,8 +1171,8 @@ function MultInstruction(address, s, t) {
 	this.execute = function () {
 		// multiply s and t as BigInt
 		const result = BigInt(this.s.read()) * BigInt(this.t.read());
-		REGISTERS[32] = (result >> BigInt(32)) & BigInt(0xFFFFFFFF);
-		REGISTERS[33] = result & BigInt(0xFFFFFFFF);
+		REGISTERS[32] = Number((result >> BigInt(32)) & BigInt(0xFFFFFFFF));
+		REGISTERS[33] = Number(result & BigInt(0xFFFFFFFF));
 		REGISTERS[34] = (address + 4) & 0xFFFFFFFF;
 	};
 
@@ -1190,8 +1212,8 @@ function MultuInstruction(address, s, t) {
 
 	this.execute = function () {
 		const result = unsignedBig(this.s.read()) * unsignedBig(this.t.read());
-		REGISTERS[32] = signed((result >> BigInt(32)) & BigInt(0xFFFFFFFF));
-		REGISTERS[33] = signed(result & BigInt(0xFFFFFFFF));
+		REGISTERS[32] = Number(signed((result >> BigInt(32)) & BigInt(0xFFFFFFFF)));
+		REGISTERS[33] = Number(signed(result & BigInt(0xFFFFFFFF)));
 		REGISTERS[34] = (address + 4) & 0xFFFFFFFF;
 	};
 
@@ -1298,7 +1320,7 @@ function MfloInstruction(address, d) {
 	this.link = function () { };
 
 	this.execute = function () {
-		this.d.write(REGISTERS[31]);
+		this.d.write(REGISTERS[33]);
 		REGISTERS[34] = (address + 4) & 0xFFFFFFFF;
 	};
 
@@ -1461,7 +1483,7 @@ function BeqInstruction(address, s, t, i) {
 		this.opcode = makeOpcode(address, '0001 00ss ssst tttt ', this) + labelBits(address, i, 20);
 	} else if (i instanceof NumberLiteral) {
 		this.description = `if (\$${s.registerNumber} = \$${t.registerNumber}) go to ${i.description(address + 4)}`;
-		this.opcode = makeOpcode(address, '0001 00ss ssst tttt IIII IIII IIII IIII', this);
+		this.opcode = makeOpcode(address, '0001 00ss ssst tttt iiii iiii iiii iiii', this);
 	} else {
 		this.description = `if (\$${s.registerNumber} = \$${t.registerNumber}) go to somewhere`;
 		this.opcode = makeOpcode(address, '0001 00ss ssst tttt ???? ???? ???? ????', this);
@@ -1472,21 +1494,21 @@ function BeqInstruction(address, s, t, i) {
 	this.link = function () {
 		if (this.i instanceof LabelReference) {
 			this.description = `if (\$${s.registerNumber} = \$${t.registerNumber}) go to ${i.description(address + 4)}`;
-			this.opcode = makeOpcode(address, '0001 00ss ssst tttt IIII IIII IIII IIII', this);
+			this.opcode = makeOpcode(address, '0001 00ss ssst tttt iiii iiii iiii iiii', this);
 			updateAddressGutter(this.address, this.opcode + " | " + this.description);
 		}
 	};
 
 	this.execute = function () {
 		if (this.s.read() === this.t.read()) {
-			REGISTERS[34] = this.i.readRelative(address + 4);
+			REGISTERS[34] = this.i.readRelative(address + 4, 4);
 		} else {
 			REGISTERS[34] = (address + 4) & 0xFFFFFFFF;
 		}
 	};
 
 	this.highlightOperands = function () {
-		highlightMemoryAccess(this.i.readRelative(address + 4));
+		highlightMemoryAccess(this.i.readRelative(address + 4, 4));
 		this.s.highlightAccess();
 		this.t.highlightAccess();
 	};
@@ -1502,7 +1524,7 @@ function BneInstruction(address, s, t, i) {
 		this.opcode = makeOpcode(address, '0001 01ss ssst tttt ', this) + labelBits(address, i, 20);
 	} else if (i instanceof NumberLiteral) {
 		this.description = `if (\$${s.registerNumber} \u2260 \$${t.registerNumber}) go to ${i.description(address + 4)}`;
-		this.opcode = makeOpcode(address, '0001 01ss ssst tttt IIII IIII IIII IIII', this);
+		this.opcode = makeOpcode(address, '0001 01ss ssst tttt iiii iiii iiii iiii', this);
 	} else {
 		this.description = `if (\$${s.registerNumber} \u2260 \$${t.registerNumber}) go to somwhere`;
 		this.opcode = makeOpcode(address, '0001 01ss ssst tttt ???? ???? ???? ????', this);
@@ -1513,21 +1535,21 @@ function BneInstruction(address, s, t, i) {
 	this.link = function () {
 		if (this.i instanceof LabelReference) {
 			this.description = `if (\$${s.registerNumber} \u2260 \$${t.registerNumber}) go to ${i.description(address + 4)}`;
-			this.opcode = makeOpcode(address, '0001 01ss ssst tttt IIII IIII IIII IIII', this);
+			this.opcode = makeOpcode(address, '0001 01ss ssst tttt iiii iiii iiii iiii', this);
 			updateAddressGutter(this.address, this.opcode + " | " + this.description);
 		}
 	};
 
 	this.execute = function () {
 		if (this.s.read() !== this.t.read()) {
-			REGISTERS[34] = this.i.readRelative(address + 4);
+			REGISTERS[34] = this.i.readRelative(address + 4, 4);
 		} else {
 			REGISTERS[34] = (address + 4) & 0xFFFFFFFF;
 		}
 	};
 
 	this.highlightOperands = function () {
-		highlightMemoryAccess(this.i.readRelative(address + 4));
+		highlightMemoryAccess(this.i.readRelative(address + 4, 4));
 		this.s.highlightAccess();
 		this.t.highlightAccess();
 	};

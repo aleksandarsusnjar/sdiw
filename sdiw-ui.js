@@ -32,6 +32,8 @@ function reassembleEverything() {
 
     leftEditor.setValue('\n'.repeat(lineCount));
 
+    let errorLines = [];
+
     for (let lineNumber = 1; lineNumber <= lineCount; lineNumber++) {
         const content = model.getLineContent(lineNumber);
 
@@ -43,6 +45,12 @@ function reassembleEverything() {
         if (lineAssembly.label || lineAssembly.length > 0) {
             lineMap['' + lineAssembly.address] = lineNumber;
         }
+
+        if (lineAssembly.error) {
+            errorLines.push(lineNumber);   
+        } else {
+            removeDecorations("error", lineNumber);
+        }
     }
 
     try {
@@ -52,7 +60,15 @@ function reassembleEverything() {
         for (assembledLine in completeAssembly) {
             const lineAssembly = completeAssembly[assembledLine];
             if (lineAssembly.instruction) {
-                lineAssembly.instruction.link();
+                try {
+                    lineAssembly.instruction.link();
+                } catch (e) {
+                    const gutter = lineAssembly.address.toString(16).padStart(8, '.') + ": " + e.message;
+                    updateGutterLine(lineAssembly.lineNumber, gutter);
+                    if (!lineAssembly.error) {
+                        errorLines.push(lineNumber);   
+                    }
+                }
             }
         }
     } finally {
@@ -60,6 +76,10 @@ function reassembleEverything() {
     }
 
     leftEditor.setValue(lines.join('\n'));
+
+    for (let lineNumber of errorLines) {
+        addDecoration("error", lineNumber);
+    }
 
     stdout.value = STDOUT;
     initializeRegisters();
@@ -108,8 +128,7 @@ function initializeRegisters() {
             try {
                 REGISTERS[r] = REGISTER_INITIAL_VALUES[key].read();
             } catch (e) {
-                REGISTERS[r] = 0;
-                alert("Could not initialize " + key + ":\n\n" + e.message);
+                REGISTERS[r] = e.message;
             }
         } else if (r == 31) {
             REGISTERS[r] = 0xDEADC0DE;
@@ -300,8 +319,14 @@ function displayStatus() {
     for (let r = 0; r < 35; r++) {
         const val = document.getElementById(`val-${r}`);
         if (val) {
-            val.innerText = describeValue(REGISTERS[r]);
-            val.parentElement.className = null;
+            const registerValue = REGISTERS[r];
+            if (typeof registerValue === 'string') {
+                val.className = 'error';
+            } else {
+                val.className = null;
+            }
+            val.innerText = describeValue(registerValue);                
+            val.parentElement.className = null;            
         }
     }
 
