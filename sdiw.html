@@ -8,11 +8,11 @@
 <body>
   <div id="banner">
 	<span id="title">SdIW * C&mu;/Later</span>
-    <button id="run-end-button" onclick="runToEnd();">Start/Continue (F5)</button>
-	<button id="run-ret-button" onclick="runToReturn();">Run up to jr $31 (Shift+F11)</button>
-    <button id="run-pause-button" onclick="pauseRunning();">Pause (Shift+F5)</button>
-    <button id="run-button" onclick="runStep();">Run a single step (F11)</button>
-	<button id="stop-button" onclick="stopReset();">Stop</button>
+    <button id="run-end-button" onclick="runToEnd();" title="Start or continue running from current location until next breakpoint or end.">Start/Continue (F5)</button>
+	<button id="run-ret-button" onclick="stepOut();" title="Start or continue running to and including the *matching* jr $31. Returns from nested jal/jalr calls are ignored.">Step Out (Shift+F11)</button>
+    <button id="run-pause-button" onclick="pauseRunning();" title="Pause/break any ongoing run.">Pause (Shift+F5)</button>
+    <button id="run-button" onclick="runStep();" title="Run just a single (next) instruction.">Run a single step (F11)</button>
+	<button id="stop-button" onclick="stopReset();" title="Stop running, reset registers and make the code editable">Stop</button>
   </div>
   <table id="wrapper">
     <thead>

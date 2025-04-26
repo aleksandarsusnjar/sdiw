@@ -3,15 +3,15 @@ const rightEditorElement = document.getElementById('editor-right')
 const stdin = document.getElementById('stdin');
 const stdout = document.getElementById('stdout');
 
-var running = false;
-var runEnd = null;
-var leftEditor, rightEditor;
-var lineMap = {};
-var lines = [];
-var completeAssembly = [];
-var leftDecorations = [], rightDecorations = [];
-var updateGutterLine = updateLeftEditorLine;
-var memoryOperands = [];
+let running = false;
+let runEnd = null;
+let leftEditor, rightEditor;
+let lineMap = {};
+let lines = [];
+let completeAssembly = [];
+let leftDecorations = [], rightDecorations = [];
+let updateGutterLine = updateLeftEditorLine;
+let memoryOperands = [];
 
 function updateAssembly(event) {
     // See https://microsoft.github.io/monaco-editor/typedoc/interfaces/editor.IModelContentChangedEvent.html
@@ -165,44 +165,55 @@ function pauseRunning() {
     runEnd = "now";
 }
 
-function runOne(instruction) {
+function runOne() {
+
+    const instruction = getCurrentInstruction();
+    if ((instruction instanceof JalInstruction) || (instruction instanceof JalInstruction)) {
+        if ((typeof runEnd === "number") && (runEnd < 0)) {
+            runEnd--;
+        }    
+    }
+
     instruction.execute();
     displayStatus();
     if (getPC() === 0xDEADC0DE) {
         stop();
-    } else if (runEnd === "return") {
-        runEnd = null;
+    }
+    
+    if (instruction instanceof JrInstruction) {
+        if (instruction.s.registerNumber === 31) {
+            if ((typeof runEnd === "number") && (runEnd < 0)) {
+                runEnd++;
+            }
+        }
+    } else {
+        if ((instruction instanceof JalInstruction) || (instruction instanceof JalInstruction)) {
+            if ((typeof runEnd === "number") && (runEnd < 0)) {
+                runEnd--;
+            }    
+        }
     }
 }
 
 function continueRunning() {
     const pc = getPC();
 
-    if ((runEnd === "now") || (runEnd == pc)) {
+    if ((runEnd === "now") || (runEnd === ("@" + pc)) || runEnd === 0) {
         runEnd = null;
         return;
     }
 
     if (!running) return;
 
-    try {
-        const instruction = getCurrentInstruction();
-        if (instruction instanceof JrInstruction) {
-            if (instruction.s.registerNumber === 31) {
-                runOne(instruction);
-            } else {
-                runOne(instruction);
-            }
-        } else {
-            runOne(instruction);
-        }
-
-
+    try {        
+        runOne();
 
         if (!hasBreakpoint(getPC())) {
-            if ((runEnd !== null) && (runEnd !== "step")) {
+            if ((runEnd !== null) && (runEnd !== "step") && (runEnd !== 0) && (runEnd !== "now")) {
                 window.setTimeout(continueRunning, 50);
             }
+        } else {
+            runEnd = null;
         }
     } catch (e) {
         alert(e.message);
@@ -210,9 +221,9 @@ function continueRunning() {
     }
 }
 
-function runToReturn() {
+function stepOut() {
     if (!running) startRunning();
-    runEnd = "return";
+    runEnd = -1;
     continueRunning();
 }
 
@@ -229,7 +240,7 @@ function runToLine(event) {
 
     if (!running) startRunning();
 
-    runEnd = lineAddress;
+    runEnd = "@" + lineAddress;
 
     continueRunning();
 }
@@ -450,12 +461,12 @@ require(['vs/editor/editor.main'], function () {
         });
 
         editor.addAction({
-            id: "run-to-return",
-            label: "Run up to jr $31",
+            id: "step-out",
+            label: "Step out",
             contextMenuGroupId: 'navigation',
             contextMenuOrder: 1.2,
             keybindings: [monacoKeyMod.Shift | monacoKeyCode.F11],
-            run: runToReturn
+            run: stepOut
         });
 
 
